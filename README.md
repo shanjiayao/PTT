@@ -2,7 +2,7 @@
 
 This is the official pytorch implementation for "**PTT: Point-Track-Transformer Module for 3D Single Object Trackingin Point Clouds**".
 
-The video of our PTT is [here](https://www.youtube.com/watch?v=7vG3v0vJsG8).
+The video of our PTT is [Youtube](https://youtu.be/Cajj6iHFvrc) ( [BiliBili](https://member.bilibili.com/platform/upload/video/frame?type=edit&bvid=BV1mf4y1s7so) ).
 
 The main pipeline of PTT is as following:
 
