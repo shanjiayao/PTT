@@ -1,6 +1,6 @@
 ## PTT
 
-This is the official pytorch implementation for "**PTT: Point-Track-Transformer Module for 3D Single Object Trackingin Point Clouds**"(submitted to **[IROS 2021](https://www.iros2021.org/)**).
+This is the official pytorch implementation for "**PTT: Point-Track-Transformer Module for 3D Single Object Trackingin Point Clouds**"(**Accepted** as Contributed paper in **[IROS 2021](https://www.iros2021.org/)**).  :star2: :star2: :star2:
 
 The video of our PTT is [Youtube](https://youtu.be/Cajj6iHFvrc) ( [BiliBili](https://www.bilibili.com/video/BV1mf4y1s7so?from=search&seid=17663681146498147644) ).
 
