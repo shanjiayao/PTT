@@ -13,7 +13,7 @@
 
 This is the official code release of "**PTT: Point-Track-Transformer Module for 3D Single Object Trackingin Point Clouds**"(**Accepted** as Contributed paper in **[IROS 2021](https://www.iros2021.org/)**).  :star2: :star2: :star2: 
 
-[conference paper](https://ieeexplore.ieee.org/document/9636821)      [video(youtube)](https://youtu.be/Cajj6iHFvrc)        [video(bilibili)](https://www.bilibili.com/video/av291947183)
+[conference paper](https://ieeexplore.ieee.org/document/9636821)  |    [video(youtube)](https://youtu.be/Cajj6iHFvrc)    |    [video(bilibili)](https://www.bilibili.com/video/av291947183)
 
 <p align="center">
 <img src="docs/sot.gif" width="800"/>
