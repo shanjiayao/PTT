@@ -1,0 +1,16 @@
+**__pycache__**
+**build**
+**egg-info**
+**dist**
+data/
+*.pyc
+venv/
+*.idea/
+*.so
+*.pkl
+*.zip
+*.bin
+cmake-3.19.6/
+tensorboard/
+**/eval/
+extralibs/

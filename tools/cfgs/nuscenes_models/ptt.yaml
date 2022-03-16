@@ -1,0 +1,155 @@
+CLASS_NAMES: trailer    # ['Car','truck', 'bus', 'trailer']
+DATA_CONFIG:
+    DEBUG: False
+    DATASET: 'NuscenesTrackingDataset'
+    DATA_PATH: '../data/nuScenes'
+    VERSION: 'v1.0-trainval'
+    KEY_FRAME_ONLY: False
+    INIT_POINTS_THRESHOLD: 1
+
+    REF_COOR: 'lidar'    # lidar / camera
+    USE_Z_AXIS: True
+    LIDAR_CROP_OFFSET: 10.0
+    LOAD_FROM_DATABASE: True
+    USE_RUNNING_MEMORY: True   # creat a dict to save lidar points to accelerate
+    NUM_CANDIDATES_PERFRAME: 4   # generate random offsets per frame
+    SEARCH_INPUT_SIZE: 1024   # the points number input the model
+    TEMPLATE_INPUT_SIZE: 512
+    REFINE_BOX_SIZE: True
+    SEARCH_BB_OFFSET: 0.0
+    SEARCH_BB_SCALE: 1.25
+    MODEL_BB_OFFSET: 0.0
+    MODEL_BB_SCALE: 1.25
+    POINT_CLOUD_RANGE: [-1, -1, -1]
+    DATA_SPLIT: {
+        'train': train_track,
+        'test': val
+    }
+    SAMPLED_INTERVAL: 1   # only for training
+    INFO_PATH: {
+        'train': nuScenes_infos_train.dat,
+        'test': nuScenes_infos_test.dat,
+    }
+    FOV_POINTS_ONLY: False
+    POINT_FEATURE_ENCODING: {
+        encoding_type: absolute_coordinates_encoding,
+        used_feature_list: [ 'x', 'y', 'z' ],
+        src_feature_list: [ 'x', 'y', 'z', 'intensity' ],
+    }
+
+
+MODEL:
+    NAME: PTT   # PTT / P2B
+    BACKBONE_3D:
+        NAME: PointNet2BackboneLight
+        DEBUG: False
+        SA_CONFIG:
+            SAMPLE_METHOD: ['fps', 'sequence', 'sequence']  # fps/sequence/rs  ffps not support
+            USE_XYZ: True
+            NORMALIZE_XYZ: True
+            NPOINTS_SEARCH: [512, 256, 128]
+            NPOINTS_TEMPLATE: [256, 128, 64]
+            RADIUS: [0.3, 0.5, 0.7]
+            NSAMPLE: [32, 32, 32]
+            MLPS: [[0, 64, 64, 128],
+                   [128, 128, 128, 256],
+                   [256, 128, 128, 256]]
+
+    SIMILARITY_MODULE:
+        NAME: CosineSimAug
+        DEBUG: False
+        MLP:
+            CHANNELS: [260, 256, 256, 256]
+            BN: True
+        CONV:
+            CHANNELS: [256, 256, 256]
+            BN: True
+
+    CENTROID_HEAD:
+        NAME: CentroidVotingHead
+        DEBUG: False
+        CLS_FC:
+            CHANNELS: [256, 256, 256, 1]
+        REG_FC:
+            CHANNELS: [259, 256, 256, 259]
+
+        TRANSFORMER_BLOCK:
+            ENABLE: True
+            NAME: TransformerBlock   # TransformerBlock / MulTransformerBlock
+            DIM_INPUT: 256
+            DIM_MODEL: 512
+            KNN: 16
+            N_HEADS: 1
+            N_LAYERS: 1
+
+        LOSS_CONFIG:
+            CLS_LOSS: BinaryCrossEntropy
+            CLS_LOSS_REDUCTION: 'mean'
+            CLS_LOSS_POS_WEIGHT: 1.0
+            REG_LOSS: smooth-l1
+            LOSS_WEIGHTS: {
+                'centroids_cls_weight': 0.2,
+                'centroids_reg_weight': 1.0
+            }
+
+    BOX_HEAD:
+        NAME: BoxVotingHead
+        DEBUG: False
+        FC: [256, 256, 256, 5]
+
+        SA_CONFIG:
+            NPOINTS: 64
+            RADIUS: 0.3
+            NSAMPLE: 16
+            MLPS: [257, 256, 256, 256]
+            USE_XYZ: True
+            NORMALIZE_XYZ: True
+            SAMPLE_METHOD: 'fps'
+
+        TRANSFORMER_BLOCK:
+            ENABLE: True
+            NAME: TransformerBlock   # TransformerBlock / MulTransformerBlock
+            DIM_INPUT: 256
+            DIM_MODEL: 512
+            KNN: 16
+            N_HEADS: 1
+            N_LAYERS: 1
+
+        LOSS_CONFIG:
+            CLS_LOSS: BinaryCrossEntropy
+            CLS_LOSS_REDUCTION: 'none'
+            CLS_LOSS_POS_WEIGHT: 2.0
+            REG_LOSS: smooth-l1
+            LOSS_WEIGHTS: {
+                'boxes_cls_weight': 1.5,
+                'boxes_reg_weight': 0.2
+            }
+
+OPTIMIZATION:
+    DEBUG: False
+    BATCH_SIZE_PER_GPU: 48
+    NUM_EPOCHS: 40
+    # optimizer
+    OPTIMIZER: adam     # adam / adam_onecycle / sgd
+    LR: 0.001    # for all
+    WEIGHT_DECAY: 0     # for all
+    BETAS: [0.5, 0.999]
+    EPS: 1e-06
+    # scheduler
+    SCHEDULER: 'step'
+    STEP_SIZE: 12
+    GAMMA: 0.2
+    # grad clip
+    GRAD_NORM_CLIP: 10
+
+TRAIN:
+    WITH_EVAL:
+        ENABLE: False
+        START_EPOCH: 5
+        INTERVAL: 1
+TEST:
+    VISUALIZE: False
+    SAVE_PCD: False
+    SHAPE_AGGREGATION: firstandprevious   # first/previous/firstandprevious/all
+    REF_BOX: previous_result   # previous_result/previous_gt/current_gt
+
