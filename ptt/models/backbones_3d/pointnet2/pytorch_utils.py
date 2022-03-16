@@ -17,7 +17,6 @@ class SharedMLP(nn.Sequential):
             *,
             bn: bool = False,
             activation=nn.ReLU(inplace=True),
-            # activation=nn.LeakyReLU(inplace=True),  # TODO relu
             preact: bool = False,
             first: bool = False,
             name: str = ""):
@@ -275,7 +274,6 @@ class Seq(nn.Sequential):
                padding=0,
                dilation=1,
                activation=nn.ReLU(inplace=True),
-               # activation=nn.LeakyReLU(inplace=True),   # TODO relu
                bn=False,
                init=nn.init.kaiming_normal_,
                bias=True,

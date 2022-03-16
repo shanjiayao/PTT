@@ -56,7 +56,6 @@ def main():
                 train_sampler.set_epoch(cur_epoch)
             batch = next(dataloader_iter)
             func = model_fn_decorator()
-            # import ipdb; ipdb.set_trace()
             load_data_to_gpu(batch)
             model.calc_flops(model, batch)
             loss, tb_dict, disp_dict = func(model, batch)

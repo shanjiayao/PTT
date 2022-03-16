@@ -176,17 +176,13 @@ def draw_scenes(points, gt_boxes=None, ref_boxes=None, ref_scores=None, ref_labe
 def draw_scenes_tracking(points, gt_boxes=None, ref_boxes=None, ref_scores=None, ref_labels=None):
     if not isinstance(points, np.ndarray):
         points = points.cpu().numpy()
-    # if ref_boxes is not None and not isinstance(ref_boxes, np.ndarray):
-    #     ref_boxes = ref_boxes.cpu().numpy()
-    # if gt_boxes is not None and not isinstance(gt_boxes, np.ndarray):
-    #     gt_boxes = gt_boxes.cpu().numpy()
+
     if ref_scores is not None and not isinstance(ref_scores, np.ndarray):
         ref_scores = ref_scores.cpu().numpy()
     if ref_labels is not None and not isinstance(ref_labels, np.ndarray):
         ref_labels = ref_labels.cpu().numpy()
 
     fig = visualize_pts(points, show_intensity=False)
-    # fig = draw_multi_grid_range(fig, bv_range=(0, -40, 80, 40))
     if gt_boxes is not None:
         corners3d = np.expand_dims(gt_boxes.corners().transpose(), 0)
         fig = draw_corners3d(corners3d, fig=fig, color=(1, 0, 0), max_num=100)
@@ -257,7 +253,6 @@ def mayavi_show(xyz, box=None, score=None):
 
     if score is not None:
         pred_score = score.view(1, -1).squeeze(0).detach().cpu().numpy()
-        # print(pred_score)
         pred_score[pred_score == 0] = -1
         pred_box_xyz_4d[:, -1] = pred_score
 
@@ -274,13 +269,6 @@ def mayavi_show(xyz, box=None, score=None):
 
 
 def mayavi_show_np(xyz: np.ndarray, box=None, score=None):
-    """
-
-    :param xyz:
-    :param box:
-    :param score:
-    :return:
-    """
     try:
         pred_box_xyz = xyz.reshape([-1, 3])
     except:
@@ -306,16 +294,6 @@ def mayavi_show_np(xyz: np.ndarray, box=None, score=None):
 
 def draw_box_by_one_corners(corners, fig, color=(0, 0, 1), line_width=4,
                             cls=None, cls_corner=6, tube_radius=None):
-    """
-
-    :param fig: mauavi fig
-    :param tube_radius:
-    :param cls: text
-    :param line_width: box line width
-    :param color: default (1, 1, 1)
-    :param corners: 8, 3
-    :return:
-    """
     b = corners
 
     if cls is not None:
@@ -338,25 +316,8 @@ def draw_box_by_one_corners(corners, fig, color=(0, 0, 1), line_width=4,
                     tube_radius=tube_radius,
                     line_width=line_width, figure=fig)
 
-    # i, j = 0, 5
-    # mlab.plot3d([b[i, 0], b[j, 0]], [b[i, 1], b[j, 1]], [b[i, 2], b[j, 2]], color=color, tube_radius=tube_radius,
-    #             line_width=line_width, figure=fig)
-    # i, j = 1, 4
-    # mlab.plot3d([b[i, 0], b[j, 0]], [b[i, 1], b[j, 1]], [b[i, 2], b[j, 2]], color=color, tube_radius=tube_radius,
-    #             line_width=line_width, figure=fig)
-
 
 def draw_line(fig, pc1, pc2, color=(0, 0.6, 0), line_width=1.0, tube_radius=None):
-    """
-
-    :param fig:
-    :param pc1: n,3
-    :param pc2: n,3
-    :param color:
-    :param line_width:
-    :param tube_radius:
-    :return:
-    """
     assert pc1.shape == pc2.shape
     for i in range(pc1.shape[0]):
         if isinstance(line_width, float):

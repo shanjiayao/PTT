@@ -69,8 +69,6 @@ def train_one_epoch(model, optimizer, train_loader, model_func, lr_scheduler, ac
                 for key, val in tb_dict.items():
                     tb_log.add_scalar('train/' + key, val, accumulated_iter)
 
-            # if (((cur_it+1) % log_interval == 0) or (cur_it == total_it_each_epoch-1)) and logger and loss_record:
-            #     logger.info('lr: %f loss: %f' % (cur_lr, loss_record.avg))
     if rank == 0:
         pbar.close()
     return accumulated_iter

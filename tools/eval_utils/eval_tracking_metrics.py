@@ -21,8 +21,6 @@ class Evaluator:
         print("-> 3D IOU is {: 2.2f}%".format(this_overlap * 100))
 
         this_accuracy = estimateAccuracy(gt, pred, dim=iou_dims)
-        # print("cur iou3d: ", this_overlap)
-        # if this_overlap >0:
         self.Success_main.add_overlap(this_overlap)
         self.Precision_main.add_accuracy(this_accuracy)
         self.Success_batch.add_overlap(this_overlap)

@@ -92,8 +92,7 @@ class TrackingEvaluator:
                             "track_id": -1, "this_BB": BBs[i], "this_PC": PCs[i],
                             "PCs": PCs, "BBs": BBs
                         })
-                    # if self.ret_dict["batch_num"] == 5:
-                    #     import ipdb; ipdb.set_trace()
+
                     if i == 0:   # first frame
                         with self.timer.env('everything else'):
                             box = self.ret_dict["this_BB"]
@@ -107,10 +106,9 @@ class TrackingEvaluator:
                             avg.add(self.timer.total_time())
                             self.timer.print_stats()
                             print('Avg fps: %.2f     Avg ms: %.2f         ' % (1 / avg.get_avg(), avg.get_avg() * 1000))
-                            if self.cfg.TEST.VISUALIZE:  # TODO check whether works well
-                                # if self.ret_dict["scene_num"] == 20 and self.ret_dict['track_id'] == 122:
+                            if self.cfg.TEST.VISUALIZE:
                                 self.mayavi_show()
-                    # update 包括第一帧，并且必须放在打印精度前
+
                     self.evaluator.update_iou(self.ret_dict['this_BB'], self.ret_dict['results_BBs'][-1])
                     tbar.update(1)
                     tbar.set_description('batch {}  '.format(self.ret_dict["batch_num"]) +
@@ -122,7 +120,6 @@ class TrackingEvaluator:
                 self.batch_log()
 
     def tracker_initialize(self):
-        # get first frame candidate pts to save pcd
         candidate_pc, candidate_label, _ = kitti_utils.crop_center_pc(
             self.ret_dict["this_PC"], self.ret_dict["this_BB"], self.ret_dict["this_BB"],
             offset=self.dataset.dataset_cfg.SEARCH_BB_OFFSET,
@@ -188,7 +185,6 @@ class TrackingEvaluator:
         })
 
     def prepare_template(self, frame_id, debug=False):
-        # AGGREGATION: IO vs ONLY0 vs ONLYI vs ALL
         if "firstandprevious".upper() in self.cfg.TEST.SHAPE_AGGREGATION.upper():
             model_pc = kitti_utils.get_model(
                 [self.ret_dict["PCs"][0], self.ret_dict["PCs"][frame_id - 1]],
@@ -268,9 +264,6 @@ class TrackingEvaluator:
         })
 
     def post_process(self):
-        """
-        post process the output from self.ret_dict['model_output']['pred_box']
-        """
         estimation_boxs_cpu = self.ret_dict['model_output']['pred_box'].squeeze(0).detach().cpu().numpy()
         box_idx = estimation_boxs_cpu[:, 4].argmax()
         estimation_box_cpu = estimation_boxs_cpu[box_idx, 0:4]
@@ -278,13 +271,9 @@ class TrackingEvaluator:
         self.ret_dict.update({
             'proposal_score': estimation_boxs_cpu[box_idx, 4]
         })
-        # print(box.orientation.rotation_matrix)
         self.ret_dict["results_BBs"].append(box)
 
     def save_track_resluts(self):
-        """
-        save the box corners for Rviz visualize
-        """
         box = copy.deepcopy(self.ret_dict["results_BBs"][-1])
         save_track_results(self.fp,
                            [self.ret_dict["scene_num"], self.ret_dict["frame_num"], self.ret_dict["batch_num"]],
@@ -292,7 +281,6 @@ class TrackingEvaluator:
 
     def save_pts_pcd(self):
         if self.cfg.TEST.SAVE_PCD:
-            # 将点云转换到box所在的相机坐标系下面，先旋转再平移
             from ptt.utils.file_io import save_pts_as_pcd
             points = copy.deepcopy(self.ret_dict["candidate_PC"].squeeze(0).detach().cpu().numpy())
             pc = PointCloud(points.T)
@@ -304,86 +292,11 @@ class TrackingEvaluator:
             rot_mat = ref_box.rotation_matrix
             pc.rotate(rot_mat)
             pc.translate(trans)
-            # mayavi_show_np(pc.points.T, self.ret_dict["this_BB"])
             save_pts_as_pcd(points=pc.points.T,
                             path="../output/pcd",
                             name=str(self.ret_dict["scene_num"]) + "_" +
                                  str(self.ret_dict["track_id"]) + "_candidatePC_" + str(
                                 self.ret_dict["frame_num"]) + ".pcd")
-
-    def mayavi_show(self, normalize=True, show_votes=False):
-        from mayavi import mlab as mlab
-        from tools.visual_utils.visualize_utils import visualize_pts, draw_corners3d, draw_line
-        if show_votes:
-            vote_xyz = self.ret_dict['model_output']['pred_vote'].squeeze(0).detach().cpu().numpy()
-            vote_score = self.ret_dict['model_output']['pred_cls'].squeeze(0).detach().cpu().numpy()
-            if normalize:
-                vote_score = self.linear_normalize(vote_score, range_=[0, 3.0])
-            vote_xyz_4d = np.ones((vote_xyz.shape[0], 4))
-            vote_xyz_4d[:, :3] = vote_xyz
-            vote_xyz_4d[:, -1] = vote_score
-
-            # search_xyz = self.ret_dict['candidate_PC'].squeeze(0).cpu().numpy()
-            # search_xyz_4d = np.zeros((search_xyz.shape[0], 4))
-            # search_xyz_4d[:, :3] = search_xyz
-            # search_xyz_4d[:, -1] = -0.5
-
-            search_xyz = self.ret_dict['candidate_PC'].squeeze(0).cpu().numpy()
-            search_xyz_4d = np.zeros((self.ret_dict["candidate_points"].shape[0], 4))
-
-            search_xyz_4d[:, :3] = self.ret_dict["candidate_points"]
-            search_xyz_4d[:, -1] = -1.0
-
-            seed_xyz = self.ret_dict['model_output']['seed_xyz'].squeeze(0).cpu().numpy()
-            seed_xyz_4d = np.zeros((seed_xyz.shape[0], 4))
-            seed_xyz_4d[:, :3] = seed_xyz[:, 1:]
-            # seed_xyz_4d[:, -1] = 2  # critical_score/vote_score
-            seed_xyz_4d[:, -1] = vote_score
-
-            center_xyz = self.ret_dict['model_output']['pred_xyz'].squeeze(0).detach().cpu().numpy()
-            center_xyz_4d = np.ones((center_xyz.shape[0], 4))
-            center_xyz_4d[:, :3] = center_xyz
-            center_xyz_4d[:, -1] = 2.0
-
-            pred_box_xyz = self.ret_dict['model_output']['pred_box'][:, :, :3].squeeze(0).detach().cpu().numpy()
-            pred_box_score = self.linear_normalize(
-                self.ret_dict['model_output']['pred_box'][:, :, -1].squeeze(0).detach().cpu().numpy(),
-                range_=[-2, 2]
-            )
-            pred_box_xyz_4d = np.ones((pred_box_xyz.shape[0], 4))
-            pred_box_xyz_4d[:, :3] = pred_box_xyz
-            # pred_box_xyz_4d[:, -1] = 2.0
-            pred_box_xyz_4d[:, -1] = pred_box_score
-
-            # final_pts = np.concatenate([search_xyz_4d, vote_xyz_4d, np.array([[0, 0, 0, 5.0]])], axis=0)
-            final_pts = np.concatenate([search_xyz_4d, np.array([[7, 0, 0, 3.2]])], axis=0)
-            fig = visualize_pts(final_pts, show_intensity=True)
-            # draw_line(fig, seed_xyz, vote_xyz)
-            # ---------------------------------------------
-            pred_bb = copy.deepcopy(self.ret_dict["results_BBs"][-1])
-            gt_bb = copy.deepcopy(self.ret_dict["this_BB"])
-            box = copy.deepcopy(self.ret_dict['ref_BB'])
-            trans = - box.center
-            rot_mat = np.transpose(box.rotation_matrix)
-            pred_bb.translate(trans)
-            pred_bb.rotate(Quaternion(matrix=(rot_mat)))
-            gt_bb.translate(trans)
-            gt_bb.rotate(Quaternion(matrix=(rot_mat)))
-
-            ref_corners3d = np.expand_dims(pred_bb.corners().transpose(), 0)
-            corners3d = np.expand_dims(gt_bb.corners().transpose(), 0)
-            draw_corners3d(corners3d, fig=fig, color=(1, 0, 0), max_num=100)
-            draw_corners3d(ref_corners3d, fig=fig, color=(0, 0, 1), cls=None, max_num=100)
-        else:
-            from tools.visual_utils import visualize_utils as V
-            V.draw_scenes_tracking(
-                points=self.ret_dict["this_PC"].points.transpose(),
-                gt_boxes=self.ret_dict["this_BB"],
-                ref_boxes=self.ret_dict["results_BBs"][-1],
-                ref_scores=None, ref_labels=np.array('Car')
-            )
-        mlab.show(1)
-        input()
 
     def batch_log(self):
         self.logger.info('batch {}  '.format(self.ret_dict["batch_num"]) +
@@ -393,16 +306,8 @@ class TrackingEvaluator:
                          'all_pts|{}| '.format(self.ret_dict['model_points'].shape[0]) +
                          'fore_pts|{}|'.format(np.sum(self.ret_dict['model_label'] == 1)))
 
-    @staticmethod
-    def linear_normalize(score, range_=None):
-        range_ = [0.0, 1.0] if not range_ else range_
-        min_, max_ = np.min(score), np.max(score)
-        vote_score = (score - min_) / (max_ - min_)
-        min_ctr_ness, max_ctr_ness = range_
-        ctr_ness_range = max_ctr_ness - min_ctr_ness
-        vote_score *= ctr_ness_range
-        vote_score += min_ctr_ness
-        return vote_score
+    def mayavi_show(self):
+        pass
 
 
 if __name__ == '__main__':

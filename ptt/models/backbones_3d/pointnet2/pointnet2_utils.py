@@ -21,17 +21,7 @@ try:
 except ImportError:
     print("please use python3")
 
-# try:
 import pointnet2_ops._ext as _ext
-# except ImportError:
-#     if not getattr(builtins, "__POINTNET2_SETUP__", False):
-#         raise ImportError(
-#             "Could not import _ext module.\n"
-#             "Please see the setup instructions in the README: "
-#             "https://github.com/erikwijmans/Pointnet2_PyTorch/blob/master/README.rst"
-#         )
-#     else:
-#         print('error')pointnet2_ops
 
 
 class FurthestPointSamplingWithDist(Function):
