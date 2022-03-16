@@ -13,11 +13,13 @@
 
 This is the official code release of "**PTT: Point-Track-Transformer Module for 3D Single Object Trackingin Point Clouds**"(**Accepted** as Contributed paper in **[IROS 2021](https://www.iros2021.org/)**).  :star2: :star2: :star2: 
 
-<img src="/home/echo/disks/DeepLearning_Projects/MyWorks/PTT/docs/sot.gif" style="zoom: 50%;" />
+[conference paper](https://ieeexplore.ieee.org/document/9636821)      [video(youtube)](https://youtu.be/Cajj6iHFvrc)        [video(bilibili)](https://www.bilibili.com/video/av291947183)
 
-​                                          [conference paper](https://ieeexplore.ieee.org/document/9636821)                                                 [video(youtube)](https://youtu.be/Cajj6iHFvrc)                                                 [video(bilibili)](https://www.bilibili.com/video/av291947183)
+<p align="center">
+<img src="docs/sot.gif" width="800"/>
+</p>
 
-This work is towards the point-based 3D SOT (**S**ingle **O**bject **T**racking) task, and is dedicated to solving several challenges brought by the natural **sparsity** of point cloud, such as: ***error accumulation***, ***sparsity sensitivity***, and ***feature ambiguity***. 
+  This work is towards the point-based 3D SOT (**S**ingle **O**bject **T**racking) task, and is dedicated to solving several challenges brought by the natural **sparsity** of point cloud, such as: ***error accumulation***, ***sparsity sensitivity***, and ***feature ambiguity***. 
 
 To this end, we proposed our PTT, a framework combining transformer and tracking pipeline. The main pipeline of PTT is as following. Experiments show that tracker can well achieve robust tracking in sparse point cloud scenes (less than 50 foreground points) by using Transformer's Self Attention to re-weight sparse features.
 
