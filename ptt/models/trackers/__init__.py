@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .ptt import PTT
-from .p2b import P2B
+#from .p2b import P2B
 
 __all__ = {
     'PTT': PTT,
-    'P2B': P2B
+    #'P2B': P2B
 }
 
 
