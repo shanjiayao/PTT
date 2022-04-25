@@ -165,7 +165,7 @@ cd PTT/tools
 python test_tracking.py --cfg_file $model_config_path --extra_tag $your_train_tag --ckpt $your_saved_ckpt
 ```
 
-If you need to test all models, you could modify the default value of '**eval_all**' in [here](https://github.com/shanjiayao/test/blob/master/tools/test_tracking.py#L36) before running above command.
+If you need to test all models, you could modify the default value of '**eval_all**' in [here](https://github.com/shanjiayao/PTT/blob/master/tools/test_tracking.py#L36) before running above command.
 
 After evaluation, the results are saved to the same path as the model, such as 'output/kitti_models/ptt/car/'.
 
