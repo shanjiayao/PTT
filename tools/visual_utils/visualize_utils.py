@@ -1,4 +1,8 @@
-import mayavi.mlab as mlab
+try:
+    import mayavi.mlab as mlab
+except ModuleNotFoundError:
+    mlab = None
+
 import numpy as np
 import torch
 
