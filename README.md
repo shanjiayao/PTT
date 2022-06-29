@@ -155,6 +155,13 @@ python train_tracking.py --cfg_file $model_config_path --extra_tag $your_train_t
 
 *By default, we use a single Nvidia RTX 3090 for training.*
 
+For training with ddp, you can execute the following command ( ensure be root dir ):
+
+```bash
+# bash scripts/train_ddp.sh 2 --cfg_file cfgs/kitti_models/ptt.yaml --extra_tag car
+bash scripts/train_ddp.sh $NUM_GPUs --cfg_file $model_config_path --extra_tag $your_train_tag
+```
+
 ### eval
 
 Similar to training, you need to configure parameters such as '**CLASS_NAMES**' in the yaml file first, and then run the following commands to test single checkpoint.
